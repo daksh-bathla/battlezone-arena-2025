@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neonbyte Studios | BattleZone Arena 2025</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --neon-cyan: #00ffff;
+            --neon-pink: #ff00ff;
+            --neon-purple: #9d00ff;
+            --neon-blue: #0080ff;
+            --dark-bg: #0a0a0f;
+            --dark-card: #1a1a2e;
+            --light-bg: #f0f0f5;
+            --light-card: #ffffff;
+            --text-light: #ffffff;
+            --text-dark: #0a0a0f;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-light);
+            overflow-x: hidden;
+            transition: background 0.5s ease, color 0.5s ease;
+        }
+
+        /* DEBUG: Prevent scrolling when mobile menu is open */
+        body.menu-open {
+            overflow: hidden; 
+        }
+
+        body.light-mode {
+            background: var(--light-bg);
+            color: var(--text-dark);
+        }
+
+        body.light-mode .card {
+            background: var(--light-card);
+            color: var(--text-dark);
+        }
+
+        body.light-mode nav {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* SPLASH SCREEN */
+        #splash {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            animation: fadeOut 0.5s ease 2s forwards;
+        }
+
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                pointer-events: none;
+            }
+        }
+
+        #splash h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3rem;
+            font-weight: 900;
+            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink), var(--neon-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: glow 1.5s ease-in-out infinite;
+        }
+
+        #splash h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            margin-top: 1rem;
+            color: var(--neon-cyan);
+        }
+
+        .loading-bar {
+            width: 300px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            margin-top: 2rem;
+            overflow: hidden;
+        }
+
+        .loading-bar::before {
+            content: '';
+            display: block;
+            height: 100%;
+            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink));
+            animation: loading 2s ease-in-out forwards;
+        }
+
+        @keyframes loading {
+            from {
+                width: 0;
+            }
+            to {
+                width: 100%;
+            }
+        }
+
+        @keyframes glow {
+            0%, 100% {
+                filter: drop-shadow(0 0 10px var(--neon-cyan));
+            }
+            50% {
+                filter: drop-shadow(0 0 30px var(--neon-pink));
+            }
+        }
+
+        /* GRID BACKGROUND */
+        #grid-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+        }
+
+        #particles-js {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+
+        /* NAVIGATION */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 1rem 2rem;
+            background: rgba(10, 10, 15, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--neon-cyan);
+        }
+
+        nav .logo {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 900;
+            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 2rem;
+        }
+
+        nav ul li a {
+            color: var(--text-light);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        nav ul li a:hover {
+            color: var(--neon-cyan);
+            text-shadow: 0 0 10px var(--neon-cyan);
+        }
+
+        #theme-toggle {
+            background: none;
+            border: 2px solid var(--neon-cyan);
+            color: var(--neon-cyan);
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
+
+        #theme-toggle:hover {
+            background: var(--neon-cyan);
+            color: var(--dark-bg);
+            box-shadow: 0 0 20px var(--neon-cyan);
+        }
+
+        /* NEW HAMBURGER MENU STYLES */
+        .menu-toggle {
+            display: none; /* Hidden on desktop */
+            background: none;
+            border: none;
+            cursor: pointer;
+            z-index: 1001;
+            padding: 10px;
+        }
+
+        .menu-toggle .bar {
+            display: block;
+            width: 25px;
+            height: 3px;
+            margin: 5px auto;
+            background-color: var(--neon-cyan);
+            transition: all 0.3s ease-in-out;
+        }
+
+        /* Open/Close Animation */
+        nav.active .menu-toggle .bar:nth-child(2) {
+            opacity: 0;
+        }
+        nav.active .menu-toggle .bar:nth-child(1) {
+            transform: translateY(8px) rotate(45deg);
+        }
+        nav.active .menu-toggle .bar:nth-child(3) {
+            transform: translateY(-8px) rotate(-45deg);
+        }
+
+
+        /* HERO SECTION */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8rem 4rem 4rem;
+            gap: 4rem;
+        }
+
+        .hero-left {
+            flex: 1;
+        }
+
+        .hero-left h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 4rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-pink), var(--neon-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .hero-left p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.8;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 50px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-blue));
+            color: #000;
+            box-shadow: 0 0 20px var(--neon-cyan);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 40px var(--neon-cyan);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 2px solid var(--neon-pink);
+            color: var(--neon-pink);
+        }
+
+        .btn-secondary:hover {
+            background: var(--neon-pink);
+            color: #000;
+            box-shadow: 0 0 30px var(--neon-pink);
+        }
+
+        .hero-right {
+            flex: 1;
+            position: relative;
+        }
+
+        .hero-right img {
+            width: 100%;
+            border-radius: 20px;
+            border: 3px solid var(--neon-cyan);
+            box-shadow: 0 0 50px var(--neon-cyan);
+        }
+
+        /* CASSETTE PLAYER */
+        .cassette-container {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 999;
+        }
+
+        .cassette {
+            width: 200px;
+            height: 120px;
+            background: linear-gradient(135deg, #1a1a2e, #2a2a3e);
+            border: 3px solid var(--neon-pink);
+            border-radius: 10px;
+            padding: 1rem;
+            box-shadow: 0 0 30px var(--neon-pink);
+            position: relative;
+        }
+
+        .cassette-label {
+            text-align: center;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.7rem;
+            color: var(--neon-cyan);
+            margin-bottom: 0.5rem;
+        }
+
+        .spindles {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 0.5rem;
+        }
+
+        .spindle {
+            width: 30px;
+            height: 30px;
+            border: 3px solid var(--neon-pink);
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .spindle::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 10px;
+            height: 10px;
+            background: var(--neon-cyan);
+            border-radius: 50%;
+        }
+
+        .spindle.spinning {
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .play-btn {
+            width: 100%;
+            padding: 0.5rem;
+            background: var(--neon-pink);
+            color: #000;
+            border: none;
+            border-radius: 5px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .play-btn:hover {
+            background: var(--neon-cyan);
+            box-shadow: 0 0 20px var(--neon-cyan);
+        }
+
+        /* MODAL */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            position: relative;
+            width: 90%;
+            max-width: 1000px;
+            border: 3px solid var(--neon-cyan);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 0 100px var(--neon-cyan);
+        }
+
+        .modal-content iframe {
+            width: 100%;
+            height: 600px;
+            border: none;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: -3rem;
+            right: 0;
+            background: var(--neon-pink);
+            color: #000;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        /* SECTIONS */
+        section {
+            padding: 4rem 4rem;
+            min-height: 50vh;
+        }
+
+        h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 3rem;
+            text-align: center;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .card {
+            background: var(--dark-card);
+            padding: 2rem;
+            border-radius: 15px;
+            border: 2px solid var(--neon-cyan);
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 0 50px var(--neon-cyan);
+        }
+
+        .card h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            color: var(--neon-pink);
+            margin-bottom: 1rem;
+        }
+
+        .card img {
+            width: 100%;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* FORM */
+        form {
+            max-width: 600px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        input, textarea {
+            padding: 1rem;
+            border: 2px solid var(--neon-cyan);
+            border-radius: 10px;
+            background: var(--dark-card);
+            color: var(--text-light);
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            box-shadow: 0 0 20px var(--neon-cyan);
+        }
+
+        body.light-mode input,
+        body.light-mode textarea {
+            background: var(--light-card);
+            color: var(--text-dark);
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            
+            /* NAVIGATION OVERHAUL */
+            nav {
+                padding: 1rem 1.5rem;
+                border-bottom: none; /* Cleaner look on mobile */
+            }
+
+            nav ul {
+                /* Mobile Menu */
+                position: fixed;
+                top: 0;
+                right: -100%; /* Start off-screen */
+                width: 60%;
+                height: 100vh;
+                background: var(--dark-bg);
+                border-left: 2px solid var(--neon-cyan);
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                gap: 3rem;
+                transition: right 0.3s ease-in-out;
+                box-shadow: -10px 0 30px rgba(0, 255, 255, 0.5);
+            }
+            
+            /* Menu active state */
+            nav.active ul {
+                right: 0;
+            }
+
+            /* Show hamburger icon */
+            .menu-toggle {
+                display: block;
+                order: 2; /* Move it to the right */
+            }
+
+            #theme-toggle {
+                order: 1; /* Keep theme toggle on the left/middle */
+            }
+
+            /* HERO SECTION */
+            .hero {
+                flex-direction: column;
+                padding: 6rem 1.5rem 2rem;
+                text-align: center;
+            }
+
+            .hero-left h1 {
+                font-size: 2.5rem;
+            }
+            
+            .hero-buttons {
+                justify-content: center;
+            }
+            
+            .hero-right img {
+                margin-top: 2rem;
+            }
+
+            /* GENERAL SECTIONS */
+            section {
+                padding: 3rem 1.5rem;
+            }
+
+            h2 {
+                font-size: 2rem;
+            }
+
+            /* CARDS */
+            .cards {
+                grid-template-columns: 1fr; /* Stack cards on top of each other */
+            }
+            
+            .card {
+                padding: 1.5rem;
+            }
+
+            /* MODAL */
+            .modal-content iframe {
+                height: 300px; /* Smaller iframe on mobile */
+            }
+
+            .close-modal {
+                top: 1rem;
+                right: 1rem;
+            }
+            
+            /* FORM */
+            form {
+                padding: 0 0.5rem;
+            }
+
+            /* CASSETTE PLAYER */
+            .cassette-container {
+                bottom: 1rem;
+                right: 1rem;
+            }
+
+            .cassette {
+                width: 130px;
+                height: 80px;
+                padding: 0.5rem;
+            }
+            
+            .cassette-label {
+                font-size: 0.6rem;
+            }
+            
+            .spindle {
+                width: 20px;
+                height: 20px;
+                border-width: 2px;
+            }
+            
+            .play-btn {
+                padding: 0.3rem;
+                font-size: 0.7rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="splash">
+        <h1>NEONBYTE STUDIOS</h1>
+        <h2>BattleZone Arena 2025</h2>
+        <div class="loading-bar"></div>
+    </div>
+
+    <canvas id="grid-canvas"></canvas>
+    <div id="particles-js"></div>
+
+    <nav>
+        <div class="logo">NEONBYTE</div>
+        <button class="menu-toggle" id="menu-toggle">
+            <span class="bar"></span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+        </button>
+        <ul id="nav-menu">
+            <li><a href="#home">Home</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#team">Team</a></li>
+            <li><a href="#games">Games</a></li>
+            <li><a href="#tournament">Tournament</a></li>
+            <li><a href="#register">Register</a></li>
+        </ul>
+        <button id="theme-toggle">🌙</button>
+    </nav>
+
+    <section class="hero" id="home">
+        <div class="hero-left">
+            <h1>BattleZone Arena 2025</h1>
+            <p>The ultimate esports tournament experience. Compete, conquer, and claim your glory in the neon-lit battleground of tomorrow.</p>
+            <div class="hero-buttons">
+                <a href="#register" class="btn btn-primary">Register Now</a>
+                <button class="btn btn-secondary" onclick="openModal()">Watch Trailer</button>
+            </div>
+        </div>
+        <div class="hero-right">
+            <img src="https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800&q=80" alt="Futuristic Arena">
+        </div>
+    </section>
+
+    <section id="about">
+        <h2>About Neonbyte Studios</h2>
+        <div class="cards">
+            <div class="card stat">
+                <div class="stat-number">50+</div>
+                <h3>Games Built</h3>
+            </div>
+            <div class="card stat">
+                <div class="stat-number">2M+</div>
+                <h3>Active Players</h3>
+            </div>
+            <div class="card stat">
+                <div class="stat-number">100+</div>
+                <h3>Tournaments Hosted</h3>
+            </div>
+        </div>
+    </section>
+
+    <section id="team">
+        <h2>Meet The Team</h2>
+        <div class="cards">
+            <div class="card">
+                <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&q=80" alt="Team Member">
+                <h3>Alex Chen</h3>
+                <p>Lead Developer</p>
+            </div>
+            <div class="card">
+                <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&q=80" alt="Team Member">
+                <h3>Maya Rodriguez</h3>
+                <p>Creative Director</p>
+            </div>
+            <div class="card">
+                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80" alt="Team Member">
+                <h3>Ryan Kim</h3>
+                <p>Esports Manager</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="games">
+        <h2>Our Games</h2>
+        <div class="cards">
+            <div class="card">
+                <img src="https://images.unsplash.com/photo-1538481199705-c710c4e965fc?w=400&q=80" alt="Game">
+                <h3>Cyber Warfare</h3>
+                <p>Tactical FPS in a neon dystopia</p>
+            </div>
+            <div class="card">
+                <img src="https://images.unsplash.com/photo-1511512578047-dfb367046420?w=400&q=80" alt="Game">
+                <h3>Neon Racers</h3>
+                <p>High-speed futuristic racing</p>
+            </div>
+            <div class="card">
+                <img src="https://images.unsplash.com/photo-1552820728-8b83bb6b773f?w=400&q=80" alt="Game">
+                <h3>Arena Legends</h3>
+                <p>5v5 competitive MOBA</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="tournament">
+        <h2>Tournament Info</h2>
+        <div class="cards">
+            <div class="card">
+                <h3>Format</h3>
+                <p>5v5 Team Battle Royale with multiple stages and elimination rounds</p>
+            </div>
+            <div class="card">
+                <h3>Rules</h3>
+                <p>Standard competitive ruleset with anti-cheat measures and fair play guidelines</p>
+            </div>
+            <div class="card">
+                <h3>Schedule</h3>
+                <p>Qualifiers: Jan 15-30 | Finals: Feb 14 | Awards: Feb 15</p>
+            </div>
+            <div class="card">
+                <h3>Prizes</h3>
+                <p>$500,000 Prize Pool | 1st: $200K | 2nd: $150K | 3rd: $100K</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="register">
+        <h2>Register Your Team</h2>
+        <form onsubmit="handleSubmit(event)">
+            <input type="text" placeholder="Your Name" required>
+            <input type="email" placeholder="Email Address" required>
+            <input type="text" placeholder="Team Name" required>
+            <input type="text" placeholder="Discord ID" required>
+            <input type="text" placeholder="Game ID" required>
+            <button type="submit" class="btn btn-primary" style="width: 100%;">Submit Registration</button>
+        </form>
+    </section>
+
+    <section id="highlights">
+        <h2>Tournament Highlights</h2>
+        <div class="cards">
+            <div class="card">
+                <iframe width="100%" height="250" src="https://www.youtube.com/embed/ZCoBfJjfeSY" frameborder="0" allowfullscreen></iframe>
+                <h3>Official Trailer</h3>
+            </div>
+            <div class="card">
+                <img src="https://images.unsplash.com/photo-1560253023-3ec5d502959f?w=400&q=80" alt="Players">
+                <h3>Top Players</h3>
+                <p>Watch the world's best compete</p>
+            </div>
+            <div class="card">
+                <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80" alt="Stage">
+                <h3>Arena Stage</h3>
+                <p>State-of-the-art esports venue</p>
+            </div>
+        </div>
+    </section>
+
+    <div class="cassette-container">
+        <div class="cassette">
+            <div class="cassette-label">BATTLEZONE 2025</div>
+            <div class="spindles">
+                <div class="spindle" id="spindle1"></div>
+                <div class="spindle" id="spindle2"></div>
+            </div>
+            <button class="play-btn" onclick="playCassette()">▶ PLAY TRAILER</button>
+        </div>
+    </div>
+
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal()">✕ CLOSE</button>
+            <iframe id="trailer-iframe" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/TextPlugin.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.12.0/tsparticles.bundle.min.js"></script>
+
+    <script>
+        // THEME TOGGLE
+        const themeToggle = document.getElementById('theme-toggle');
+        const body = document.body;
+
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'light') {
+            body.classList.add('light-mode');
+            themeToggle.textContent = '☀️';
+        }
+
+        themeToggle.addEventListener('click', () => {
+            body.classList.toggle('light-mode');
+            const isLight = body.classList.contains('light-mode');
+            themeToggle.textContent = isLight ? '☀️' : '🌙';
+            localStorage.setItem('theme', isLight ? 'light' : 'dark');
+        });
+        
+        // MOBILE NAV TOGGLE
+        const nav = document.querySelector('nav');
+        const menuToggle = document.getElementById('menu-toggle');
+        const navMenu = document.getElementById('nav-menu');
+
+        menuToggle.addEventListener('click', () => {
+            nav.classList.toggle('active');
+            // DEBUG: Prevent body scrolling when menu is active
+            document.body.classList.toggle('menu-open'); 
+        });
+        
+        // Close menu when a link is clicked
+        navMenu.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', function() {
+                // Wait for the smooth scroll to finish, then close the menu
+                setTimeout(() => {
+                    nav.classList.remove('active');
+                    // DEBUG: Re-enable body scrolling
+                    document.body.classList.remove('menu-open'); 
+                }, 500); 
+            });
+        });
+
+        // CASSETTE PLAYER
+        function playCassette() {
+            const spindles = document.querySelectorAll('.spindle');
+            spindles.forEach(s => s.classList.add('spinning'));
+            
+            // Click sound (minimalistic data URL)
+            const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBi2J0fPWhS4FHm3A7OGeUREOXqnl8K1dGAg8m9ry');
+            audio.play();
+            
+            setTimeout(() => {
+                openModal();
+                spindles.forEach(s => s.classList.remove('spinning'));
+            }, 1000);
+        }
+
+        function openModal() {
+            const modal = document.getElementById('modal');
+            const iframe = document.getElementById('trailer-iframe');
+            // Ensure autoplay is off initially, will be manually started by user interaction
+            iframe.src = 'https://www.youtube.com/embed/ZCoBfJjfeSY?autoplay=0';
+            modal.classList.add('active');
+            gsap.from('.modal-content', { scale: 0.5, opacity: 0, duration: 0.5, ease: 'back.out' });
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('modal');
+            const iframe = document.getElementById('trailer-iframe');
+            // Stop video playback by clearing the source
+            iframe.src = '';
+            modal.classList.remove('active');
+        }
+
+        // FORM SUBMIT
+        function handleSubmit(e) {
+            e.preventDefault();
+            alert('🎮 Registration Successful! Welcome to BattleZone Arena 2025!');
+            e.target.reset();
+        }
+
+        // THREE.JS GRID
+        const canvas = document.getElementById('grid-canvas');
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+
+        const geometry = new THREE.PlaneGeometry(100, 100, 50, 50);
+        const material = new THREE.MeshBasicMaterial({ 
+            color: 0x00ffff, 
+            wireframe: true,
+            transparent: true,
+            opacity: 0.1
+        });
+        const grid = new THREE.Mesh(geometry, material);
+        grid.rotation.x = -Math.PI / 3;
+        scene.add(grid);
+
+        camera.position.z = 30;
+        camera.position.y = 10;
+
+        function animate() {
+            requestAnimationFrame(animate);
+            grid.rotation.z += 0.001;
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // PARTICLES
+        tsParticles.load("particles-js", {
+            particles: {
+                number: { value: 80, density: { enable: true, value_area: 800 } },
+                color: { value: ["#00ffff", "#ff00ff", "#9d00ff"] },
+                shape: { type: "circle" },
+                opacity: { value: 0.5, random: true },
+                size: { value: 3, random: true },
+                move: {
+                    enable: true,
+                    speed: 1,
+                    direction: "none",
+                    random: true,
+                    out_mode: "out"
+                }
+            },
+            interactivity: {
+                events: {
+                    onhover: { enable: true, mode: "repulse" },
+                    onclick: { enable: true, mode: "push" }
+                }
+            }
+        });
+
+        // GSAP ANIMATIONS & SCROLLTRIGGER
+        // UPDATED: Registered TextPlugin
+        gsap.registerPlugin(ScrollTrigger, TextPlugin); 
+
+        // 1. Home (Initial Load & Nav) - UPDATED with Text Scramble
+        gsap.from('nav', { opacity: 0, y: -50, duration: 0.8, delay: 2.5, ease: 'power2.out' });
+        
+        // Set initial states for hero-left content
+        gsap.set('.hero-left', { opacity: 1 }); // Make sure parent is visible
+        gsap.set(['.hero-left p', '.hero-buttons'], { opacity: 0, x: -50 }); // Hide p and buttons to fade in
+
+        // Text Scramble for H1
+        gsap.from('.hero-left h1', {
+            duration: 2, // Scramble duration
+            text: {
+                value: "B@TT13Z0N3 4R3N4 2O2S", // Starting (scrambled) text
+                chars: "upper", // Use uppercase chars for scramble
+                speed: 0.5
+            },
+            delay: 2.5, // Start after splash
+            ease: "none"
+        });
+
+        // Fade in for the paragraph
+        gsap.to('.hero-left p', {
+            opacity: 1,
+            x: 0,
+            duration: 1,
+            delay: 3.0, // Start slightly after the scramble begins
+            ease: 'power2.out'
+        });
+        
+        // Fade in for the buttons
+        gsap.to('.hero-buttons', {
+            opacity: 1,
+            x: 0,
+            duration: 1,
+            delay: 3.2, // Start after the paragraph
+            ease: 'power2.out'
+        });
+
+        // Keep the original hero-right animation
+        gsap.from('.hero-right', { opacity: 0, x: 100, duration: 1, delay: 2.5 });
+
+        // 2. About Section: Stat Cards
+        gsap.utils.toArray('#about .card').forEach((card, i) => {
+            gsap.from(card, {
+                scrollTrigger: { trigger: card, start: "top 85%" },
+                duration: 1.2,
+                opacity: 0, y: 30, scale: 0.8,
+                ease: 'power3.out',
+                delay: i * 0.15,
+            });
+            // Text Scan-in Effect for numbers
+            gsap.from(card.querySelector('.stat-number'), {
+                scrollTrigger: { trigger: card, start: "top 85%" },
+                duration: 0.5,
+                clipPath: 'inset(0 100% 0 0)',
+                ease: 'power1.inOut',
+                delay: i * 0.15 + 0.5
+            });
+        });
+
+        // 3. Team Section: Cards
+        gsap.utils.toArray('#team .card').forEach((card, i) => {
+            gsap.from(card, {
+                scrollTrigger: { trigger: card, start: "top 85%" },
+                duration: 0.7,
+                opacity: 0,
+                rotationY: 90,
+                transformOrigin: "center top",
+                ease: 'back.out(1.7)',
+                delay: i * 0.2,
+            });
+        });
+
+        // 4. Games Section: Cards
+        gsap.utils.toArray('#games .card').forEach((card, i) => {
+            gsap.from(card, {
+                scrollTrigger: { trigger: card, start: "top 85%" },
+                duration: 0.8,
+                opacity: 0,
+                y: 50,
+                skewY: 5,
+                ease: 'power2.out',
+                delay: i * 0.15,
+            });
+        });
+
+        // 5. Tournament Section: Info Cards
+        gsap.utils.toArray('#tournament .card').forEach((card, i) => {
+            const isOdd = i % 2 !== 0;
+            gsap.from(card, {
+                scrollTrigger: { trigger: card, start: "top 85%" },
+                duration: 0.6,
+                opacity: 0,
+                x: isOdd ? 50 : -50,
+                ease: 'power2.out',
+                delay: i * 0.1,
+            });
+        });
+
+        // 6. Register Section: Form
+        gsap.from('#register form', {
+            scrollTrigger: { trigger: '#register', start: "top 75%" },
+            duration: 1.5,
+            opacity: 0,
+            y: 50,
+            ease: 'elastic.out(1, 0.5)',
+            delay: 0.5
+        });
+
+        // Register Button Pulse
+        gsap.to('#register .btn-primary', {
+            scrollTrigger: { 
+                trigger: '#register', 
+                start: "top 60%", 
+                toggleActions: "play none none reverse"
+            },
+            scale: 1.05,
+            duration: 0.5,
+            yoyo: true,
+            repeat: 1,
+            ease: 'power1.inOut',
+            delay: 2
+        });
+        
+        // 7. Highlights Section (Kept original logic for the final section)
+        gsap.utils.toArray('#highlights .card').forEach((card, i) => {
+            gsap.from(card, {
+                scrollTrigger: {
+                    trigger: card,
+                    start: "top 80%",
+                },
+                opacity: 0,
+                y: 50,
+                duration: 0.6,
+                delay: i * 0.1
+            });
+        });
+
+
+        // SMOOTH SCROLL
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
